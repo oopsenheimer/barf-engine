@@ -1,1 +1,1 @@
-# barf-engine
+# BARF — Balance Aggregation and Repricing Framework
