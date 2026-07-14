@@ -1,0 +1,3 @@
+- [ ] Make Bars
+- [ ] Handle all_users in every market step
+- [ ] Optimize File read/write
