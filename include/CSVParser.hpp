@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include <sstream>
 
 struct UserData {
@@ -22,14 +23,15 @@ struct UserData {
         std::getline(data_stream, currency, ',');
         std::getline(data_stream, timestamp_str, ',');
         std::getline(data_stream, delta_str, ',');
-        timestamp = stoll(timestamp_str);
-        delta = stold(delta_str);
+        timestamp = std::stoll(timestamp_str);
+        delta = std::stold(delta_str);
         is_valid = true;
     }
 };
 
 struct MarketData {
-    std::string symbol;
+    std::string from_currency;
+    std::string to_currency;
     long long timestamp;
     long double price;
     bool is_valid = false;
@@ -41,13 +43,16 @@ struct MarketData {
             return;
         }
         std::stringstream data_stream(market_data_row);
+        std::string symbol;
         std::string timestamp_str;
         std::string price_str;
         std::getline(data_stream, symbol, ',');
         std::getline(data_stream, timestamp_str, ',');
         std::getline(data_stream, price_str, ',');
-        timestamp = stoll(timestamp_str);
-        price = stold(price_str);
+        from_currency = symbol.substr(0, 3);
+        to_currency = symbol.substr(3);
+        timestamp = std::stoll(timestamp_str);
+        price = std::stold(price_str);
         is_valid = true;
     }
 };
