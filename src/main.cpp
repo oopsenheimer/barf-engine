@@ -1,55 +1,36 @@
-#include <map>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <limits>
 
-#include "BarfEngine.hpp"
-#include "CSVParser.hpp"
-#include "File.hpp"
+#include "Data.hpp"
+#include "Engine.hpp"
+#include "Transformer.hpp"
+#include "Source.hpp"
 
-constexpr std::string USER_DATA_FILE = "user_data.csv";
-constexpr std::string MARKET_DATA_FILE = "market_data.csv";
-constexpr std::string BARS_1H_FILE = "bars-1h.csv";
-constexpr std::string BARS_1D_FILE = "bars-1d.csv";
-constexpr std::string BARS_30D_FILE = "bars-30d.csv";
-
-File market_data_file(MARKET_DATA_FILE);
-File user_data_file(USER_DATA_FILE);
-File bars_1h_file(BARS_1H_FILE, File::RW_FILE);
-File bars_1d_file(BARS_1D_FILE, File::RW_FILE);
-File bars_30d_file(BARS_30D_FILE, File::RW_FILE);
-
-long long global_start_ts = -1;
-long long global_end_ts = -1;
-long long global_last_ts = -1;
+constexpr const char* MARKET_DATA_FILENAME = "market_data.csv";
+constexpr const char* USER_DATA_FILENAME = "user_data.csv";
 
 int main() {
+    Source market_data_file(MARKET_DATA_FILENAME);
+    Source user_data_file(USER_DATA_FILENAME);
 
-    std::string user_data_row;
-    user_data_file.read_line(user_data_row);
-    auto user_data = UserData(user_data_row);
+    // get headers out
+    auto market_data_h = market_data_file.read_line();
+    auto user_data_h = user_data_file.read_line();
 
-    std::string market_data_row;
-    market_data_file.read_line(market_data_row);
-    auto market_data = MarketData(market_data_row);
+    auto market_tick = market_tick_parser(market_data_file.read_line());
+    auto transaction = transaction_data_parser(user_data_file.read_line());
 
-    while (user_data.is_valid || market_data.is_valid) {
-        long long m_ts =
-            market_data.is_valid ? market_data.timestamp : std::numeric_limits<long long>::max();
-        long long u_ts =
-            user_data.is_valid ? user_data.timestamp : std::numeric_limits<long long>::max();
-        global_last_ts = std::min(m_ts, u_ts);
-        if (m_ts <= u_ts) {
-            // process the market data -> update the exchange rates
-            
-            // process the users having that currency and update the values
+    Engine barf;
 
-            market_data_file.read_line(market_data_row);
-            market_data = MarketData(market_data_row);
+    while (market_tick.is_valid || transaction.is_valid) {
+        Time m_ts = market_tick.is_valid ? market_tick.timestamp : std::numeric_limits<Time>::max();
+        Time t_ts = transaction.is_valid ? transaction.timestamp : std::numeric_limits<Time>::max();
+
+        if (m_ts <= t_ts) {
+            barf.process_market_tick(market_tick);
+            market_tick = market_tick_parser(market_data_file.read_line());
         } else {
-            user_data_file.read_line(user_data_row);
-            user_data = UserData(user_data_row);
+            barf.process_transaction(transaction);
+            transaction = transaction_data_parser(user_data_file.read_line());
         }
     }
 }
