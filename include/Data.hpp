@@ -44,10 +44,9 @@ struct OpenBar {
     Time bar_start_ts;
     Amount min_bal;
     Amount max_bal;
-    Amount sum_bal;
+    Amount sum_bal{};
     Amount last_bal;
     Time last_update_ts;
-    bool is_valid = false;
 
     OpenBar(Time bar_start_ts, Time update_ts, Amount bal)
         : bar_start_ts(bar_start_ts),
@@ -58,7 +57,6 @@ struct OpenBar {
 };
 
 struct UserData {
-    Amount current_balance;
     std::unordered_map<std::string, Amount> quantity;
     std::array<std::optional<OpenBar>, NUM_PERIODS> open_bar;
 };
