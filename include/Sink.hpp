@@ -15,7 +15,7 @@ class Sink {
     Sink& operator=(Sink&& other) noexcept = default;
 
     Sink(const char* file_name) {
-        file.open(file_name, std::ios_base::trunc | std::ios_base::in | std::ios_base ::out);
+        file.open(file_name, std::ios_base::trunc | std::ios_base ::out);
         if (!file.is_open()) {
             throw std::runtime_error("[-] ERROR OPENING SINK FILE");
         }
