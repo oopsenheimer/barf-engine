@@ -68,9 +68,9 @@ class Engine {
         }
     }
 
-    void update_user_bar(const std::string& user_id, const Amount& user_bal,
-                                const Time& timestamp, const Time& period, const int& period_idx,
-                                std::optional<OpenBar>& open_bar) {
+    void update_user_bar(const std::string& user_id, const Amount& user_bal, const Time& timestamp,
+                         const Time& period, const int& period_idx,
+                         std::optional<OpenBar>& open_bar) {
         auto event_bar_start_ts = get_bar_start_timestamp(timestamp, period);
         auto event_bar_end_ts = get_bar_end_timestamp(timestamp, period);
 
@@ -83,17 +83,15 @@ class Engine {
 
         while (closed_bar_cnt > 0) {
             close_bar(period, open_bar);
-            flush_bar(user_id, get_closed_bar(open_bar, period), period);
+            flush_bar(user_id, get_closed_bar(open_bar, period), period_idx);
             open_bar->bar_start_ts += period;
-            open_bar->min_bal = user_bal;
-            open_bar->max_bal = user_bal;
             open_bar->last_update_ts = open_bar->bar_start_ts;
             open_bar->sum_bal = 0;
             closed_bar_cnt--;
         }
         assert(event_bar_start_ts == open_bar->bar_start_ts);
-        open_bar->min_bal = user_bal;
-        open_bar->max_bal = user_bal;
+        open_bar->min_bal = open_bar->last_bal;
+        open_bar->max_bal = open_bar->last_bal;
         open_bar->sum_bal += open_bar->last_bal * (timestamp - open_bar->last_update_ts);
         open_bar->last_bal = user_bal;
         open_bar->last_update_ts = timestamp;
@@ -124,7 +122,9 @@ class Engine {
     }
 
     void flush_bar(const std::string& user_id, const Bar& closed_bar, const Time& period_idx) {
-        output_file[period_idx]->write_line(closed_bar_parser(user_id, closed_bar));
+        if (output_file[period_idx].has_value()) {
+            output_file[period_idx]->write_line(closed_bar_parser(user_id, closed_bar));
+        }
     }
 
     static Bar get_closed_bar(const std::optional<OpenBar>& open_bar, const Time& period) {
