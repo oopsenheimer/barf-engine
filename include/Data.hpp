@@ -1,12 +1,14 @@
 #pragma once
 
 #include <array>
+#include <optional>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
-using Price =  long double;
+using Amount = long double;
 using Time = long long;
+
+constexpr int NUM_PERIODS = 3;
 
 constexpr Time ONE_HOUR_TIME_PERIOD = 3600;
 constexpr Time ONE_DAY_TIME_PERIOD = 86400;
@@ -14,14 +16,14 @@ constexpr Time THIRTY_DAYS_TIME_PERIOD = 2592000;
 
 constexpr const char* USD = "USD";
 
-std::vector<std::pair<std::string, Time>> time_periods = {
-    {"1h", ONE_HOUR_TIME_PERIOD}, {"1d", ONE_DAY_TIME_PERIOD}, {"30d", THIRTY_DAYS_TIME_PERIOD}};
+constexpr std::array<Time, NUM_PERIODS> PERIODS = {ONE_HOUR_TIME_PERIOD, ONE_DAY_TIME_PERIOD,
+                                         THIRTY_DAYS_TIME_PERIOD};
 
 struct TransactionData {
     std::string user_id;
     std::string currency;
     Time timestamp;
-    Price delta;
+    Amount delta;
     bool is_valid = false;
 };
 
@@ -29,19 +31,34 @@ struct MarketTickData {
     std::string from_currency;
     std::string to_currency;
     Time timestamp;
-    Price price;
+    Amount price;
     bool is_valid = false;
 };
 
 struct Bar {
     Time bar_start_ts;
-    Price min_bal;
-    Price max_bal;
-    Price avg_bal;
+    Amount min_bal, max_bal, avg_bal;
+};
+
+struct OpenBar {
+    Time bar_start_ts;
+    Amount min_bal;
+    Amount max_bal;
+    Amount sum_bal;
+    Amount last_bal;
+    Time last_update_ts;
+    bool is_valid = false;
+
+    OpenBar(Time bar_start_ts, Time update_ts, Amount bal)
+        : bar_start_ts(bar_start_ts),
+          min_bal(bal),
+          max_bal(bal),
+          last_bal(bal),
+          last_update_ts(update_ts) {}
 };
 
 struct UserData {
-    Price current_balance;
-    std::unordered_map<std::string, long long> ammount;
-    std::array<Bar, 3> open_bar;
+    Amount current_balance;
+    std::unordered_map<std::string, Amount> quantity;
+    std::array<std::optional<OpenBar>, NUM_PERIODS> open_bar;
 };
