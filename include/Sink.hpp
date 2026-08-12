@@ -21,7 +21,7 @@ class Sink {
         }
     }
 
-    void write_line(const char* line) {
+    void write_line(const std::string& line) {
         file << line << '\n';
     }
 };
