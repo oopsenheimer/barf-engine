@@ -87,6 +87,8 @@ class Engine {
             open_bar->bar_start_ts += period;
             open_bar->last_update_ts = open_bar->bar_start_ts;
             open_bar->sum_bal = 0;
+            open_bar->min_bal = open_bar->last_bal;
+            open_bar->max_bal = open_bar->last_bal;
             closed_bar_cnt--;
         }
         assert(event_bar_start_ts == open_bar->bar_start_ts);
