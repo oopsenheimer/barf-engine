@@ -25,6 +25,7 @@ int main() {
 
     Engine barf;
     barf.initilize_output_files(
+        get_output_header(),
         {H1_BARS_OUTPUT_FILENAME, D1_BARS_OUTPUT_FILENAME, D30_BARS_OUTPUT_FILENAME});
 
     while (market_tick.is_valid || transaction.is_valid) {

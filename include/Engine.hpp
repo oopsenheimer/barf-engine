@@ -55,9 +55,10 @@ class Engine {
         }
     }
 
-    void initilize_output_files(const std::array<const char*, NUM_PERIODS>& file_name) {
+    void initilize_output_files(const std::string& headers, const std::array<const char*, NUM_PERIODS>& file_name) {
         for (int i = 0; i < NUM_PERIODS; ++i) {
             output_file[i] = Sink(file_name[i]);
+            output_file[i]->write_line(headers);
         }
     }
 
@@ -73,7 +74,6 @@ class Engine {
                          const Time& period, const int& period_idx,
                          std::optional<OpenBar>& open_bar) {
         auto event_bar_start_ts = get_bar_start_timestamp(timestamp, period);
-        auto event_bar_end_ts = get_bar_end_timestamp(timestamp, period);
 
         if (!open_bar.has_value()) {
             open_bar = OpenBar{event_bar_start_ts, timestamp, user_bal};

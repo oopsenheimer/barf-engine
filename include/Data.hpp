@@ -15,6 +15,8 @@ constexpr Time ONE_DAY_TIME_PERIOD = 86400;
 constexpr Time THIRTY_DAYS_TIME_PERIOD = 2592000;
 
 constexpr const char* USD = "USD";
+constexpr const char* OUTPUT_HEADER =
+    "user_id,minimum_balance,maximum_balance,average_balance,start_timestamp";
 
 constexpr std::array<Time, NUM_PERIODS> PERIODS = {ONE_HOUR_TIME_PERIOD, ONE_DAY_TIME_PERIOD,
                                          THIRTY_DAYS_TIME_PERIOD};

@@ -53,6 +53,10 @@ MarketTickData market_tick_parser(const std::string& data_line) {
     return res;
 }
 
+std::string get_output_header() {
+    return OUTPUT_HEADER;
+}
+
 std::string closed_bar_parser(const std::string& user_id, const Bar& closed_bar) {
     return user_id + ',' + std::to_string(closed_bar.min_bal) + ',' +
            std::to_string(closed_bar.max_bal) + ',' + std::to_string(closed_bar.avg_bal) + ',' +
