@@ -31,12 +31,13 @@ class Engine {
         }
     }
     void process_transaction(const TransactionData& transaction_data) {
-        users[transaction_data.user_id].quantity[transaction_data.currency] +=
-            transaction_data.delta;
+        auto& user_data = users[transaction_data.user_id];
+
+        user_data.quantity[transaction_data.currency] += transaction_data.delta;
         currency_users[transaction_data.currency].insert(transaction_data.user_id);
 
         // update that user_id
-        update_user_data(transaction_data.user_id, transaction_data.timestamp);
+        update_user_data(transaction_data.user_id, transaction_data.timestamp, user_data);
     }
 
     void process_market_tick(const MarketTickData& market_data) {
@@ -50,7 +51,7 @@ class Engine {
 
         for (const std::string& user_id : currency_users[market_data.from_currency]) {
             // update those user_id
-            update_user_data(user_id, market_data.timestamp);
+            update_user_data(user_id, market_data.timestamp, users[user_id]);
         }
     }
 
@@ -61,10 +62,10 @@ class Engine {
     }
 
    private:
-    void update_user_data(const std::string& user_id, const Time& timestamp) {
-        auto new_bal = get_user_bal(user_id);
+    void update_user_data(const std::string& user_id, const Time& timestamp, UserData& user_data) {
+        auto new_bal = get_user_bal(user_data.quantity);
         for (int i = 0; i < NUM_PERIODS; ++i) {
-            update_user_bar(user_id, new_bal, timestamp, PERIODS[i], i, users[user_id].open_bar[i]);
+            update_user_bar(user_id, new_bal, timestamp, PERIODS[i], i, user_data.open_bar[i]);
         }
     }
 
@@ -104,10 +105,10 @@ class Engine {
             open_bar->last_bal * (open_bar->bar_start_ts + period - open_bar->last_update_ts);
     }
 
-    Amount get_user_bal(const std::string& user_id) {
+    Amount get_user_bal(const decltype(UserData::quantity)& quantity) {
         Amount res = 0;
-        for (auto& [cur, cnt] : users[user_id].quantity) {
-            res += exchange_rate[cur] * cnt;
+        for (const auto& [cur, cnt] : quantity) {
+            res += exchange_rate.at(cur) * cnt;
         }
         return res;
     }
