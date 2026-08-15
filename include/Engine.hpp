@@ -93,8 +93,13 @@ class Engine {
             closed_bar_cnt--;
         }
         assert(event_bar_start_ts == open_bar->bar_start_ts);
-        open_bar->min_bal = open_bar->last_bal;
-        open_bar->max_bal = open_bar->last_bal;
+        if (timestamp == event_bar_start_ts) {
+            open_bar->min_bal = user_bal;
+            open_bar->max_bal = user_bal;
+        } else {
+            open_bar->min_bal = std::min(user_bal, open_bar->min_bal);
+            open_bar->max_bal = std::max(user_bal, open_bar->max_bal);
+        }
         open_bar->sum_bal += open_bar->last_bal * (timestamp - open_bar->last_update_ts);
         open_bar->last_bal = user_bal;
         open_bar->last_update_ts = timestamp;
